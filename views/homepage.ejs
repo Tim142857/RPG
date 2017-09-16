@@ -1,0 +1,15 @@
+<script>
+    var myId =<%= idPlayer %>
+</script>
+<% block('localScripts', '' +
+        '<script src="/js/dependencies/sails.io.js"></script>' + '\n' +
+        '<script src="/js/classes/Map.js"></script>' + '\n' +
+        '<script src="/js/classes/Personnage.js"></script><br/>' + '\n' +
+        '<script src="/js/classes/Tileset.js"></script><br/>' + '\n' +
+        '<script src="/js/json2.js"></script><br/>' + '\n' +
+        '<script src="/js/oXHR.js"></script><br/>' + '\n' +
+        '<script src="/js/rpg.js"></script>') %>
+<canvas id="canvas">Votre navigateur ne supporte pas HTML5, veuillez le mettre � jour pour jouer.</canvas>
+<form id="formChat">
+    <input type="text" id="inputChat" class="hidden" style="position:fixed; top:90%; left:4%; width:60%">
+</form>
