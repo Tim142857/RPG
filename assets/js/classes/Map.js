@@ -1,4 +1,4 @@
-function Map(nom) {
+function Map(nom, jsonMap) {
     // Création de l'objet XmlHttpRequest
     var xhr = getXMLHttpRequest();
 
@@ -12,7 +12,8 @@ function Map(nom) {
     // Analyse des données
     var mapData = JSON.parse(mapJsonData);
     this.tileset = new Tileset(mapData.tileset);
-    this.terrain = mapData.terrain;
+    // this.terrain = mapData.terrain;
+    this.terrain = jsonMap;
 
     // Liste des personnages présents sur le terrain.
     this.personnages = new Array();

@@ -3,8 +3,42 @@ $(document).ready(function () {
         var map, canvas, ctx, joueur;
         var modeChat = false;
 
+        //génération de la map
+        //l=lignes
+        //c=colonnesv
+        var jsonMap = [];
+        console.log('------------------- jsonMap ----------------');
+        console.log(jsonMap);
+        console.log('debut iteration');
+        console.log('------------------- arrayMap ----------------');
+        console.log(arrayMap);
+        console.log('height: ' + arrayMap.height);
+        for (var l = 0; l < arrayMap.height; l++) {
+            console.log('ici');
+            var line = [];
+            for (var c = 0; c < arrayMap.width; c++) {
+                line.push(arrayMap.defaultObject.numFirstImage);
+            }
+            jsonMap.push(line);
+            if (l == (arrayMap.height - 1)) {
+
+                for (var i = 0; i < arrayMap.objects.length; i++) {
+                    var elm = arrayMap.objects[i];
+                    var objectX = elm.coordX;
+                    var objectY = elm.coordY;
+                    console.log('width: ' + elm.width);
+                    for (var k = objectX; k <= elm.height + 1; k++) {
+                        for (var m = objectY; m <= elm.width + 1; m++) {
+                            jsonMap[k][m] = elm.numFirstImage + (m - objectX) + ((k - objectX) * 5);
+                        }
+                    }
+                }
+            }
+        }
+
+
         var initialisationCanvas = function () {
-            map = new Map("premiere");
+            map = new Map("premiere", jsonMap);
             canvas = document.getElementById('canvas');
             ctx = canvas.getContext('2d');
 
@@ -154,7 +188,5 @@ $(document).ready(function () {
             $('#inputChat').val('');
             modeChat = false;
         });
-
-
     })
 });

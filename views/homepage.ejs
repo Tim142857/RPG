@@ -1,5 +1,6 @@
 <script>
-    var myId =<%= idPlayer %>
+    var arrayMap =<%- JSON.stringify(map) %>;
+    var myId =<%= idPlayer %>;
 </script>
 <% block('localScripts', '' +
         '<script src="/js/dependencies/sails.io.js"></script>' + '\n' +

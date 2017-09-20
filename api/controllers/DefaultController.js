@@ -7,7 +7,15 @@
 
 module.exports = {
     index: function (req, res) {
-        return res.view('homepage', {idPlayer: req.session.user.id});
+
+        Map.findOne({id: 1}).populate('objects').populate('defaultObject').exec(function (err, map) {
+            if (err) {
+                console.log(err);
+            } else {
+                return res.view('homepage', {idPlayer: req.session.user.id, map: map});
+            }
+        })
+
     },
     loadPlayers: function (req, res) {
         var newSocket = sails.sockets.getId(req);
