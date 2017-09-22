@@ -1,3 +1,9 @@
 .hidden {
     display: none;
 }
+
+.canvasGame {
+    position: absolute;
+    top: 0;
+    left: 0;
+}

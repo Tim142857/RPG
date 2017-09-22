@@ -1,20 +1,14 @@
 $(document).ready(function () {
     io.socket.on('connect', function () {
-        var map, canvas, ctx, joueur;
+        var map, canvasMap, ctx, joueur;
         var modeChat = false;
+        var canvasEntities, ctx2;
+        var timeLoop = 40;
+        var timeBeforeInitMap = 5000;
+        var mapInitialised = false;
 
-        //génération de la map
-        //l=lignes
-        //c=colonnesv
         var jsonMap = [];
-        console.log('------------------- jsonMap ----------------');
-        console.log(jsonMap);
-        console.log('debut iteration');
-        console.log('------------------- arrayMap ----------------');
-        console.log(arrayMap);
-        console.log('height: ' + arrayMap.height);
         for (var l = 0; l < arrayMap.height; l++) {
-            console.log('ici');
             var line = [];
             for (var c = 0; c < arrayMap.width; c++) {
                 line.push(arrayMap.defaultObject.numFirstImage);
@@ -26,7 +20,6 @@ $(document).ready(function () {
                     var elm = arrayMap.objects[i];
                     var objectX = elm.coordX;
                     var objectY = elm.coordY;
-                    console.log('width: ' + elm.width);
                     for (var k = objectX; k <= elm.height + 1; k++) {
                         for (var m = objectY; m <= elm.width + 1; m++) {
                             jsonMap[k][m] = elm.numFirstImage + (m - objectX) + ((k - objectX) * 5);
@@ -39,11 +32,21 @@ $(document).ready(function () {
 
         var initialisationCanvas = function () {
             map = new Map("premiere", jsonMap);
-            canvas = document.getElementById('canvas');
-            ctx = canvas.getContext('2d');
+            canvasMap = document.getElementById('canvasMap');
+            ctx = canvasMap.getContext('2d');
+            canvasMap.width = map.getLargeur() * 32;
+            canvasMap.height = map.getHauteur() * 32;
 
-            canvas.width = map.getLargeur() * 32;
-            canvas.height = map.getHauteur() * 32;
+            canvasEntities = document.getElementById('canvasEntities');
+            ctx2 = canvasEntities.getContext('2d');
+            canvasEntities.width = map.getLargeur() * 32;
+            canvasEntities.height = map.getHauteur() * 32;
+
+            setTimeout(function () {
+                map.initMap(ctx);
+                mapInitialised = true;
+                console.log('init map');
+            }, 5000);
         }
 
         var beginChat = function () {
@@ -53,13 +56,17 @@ $(document).ready(function () {
         }
 
         setInterval(function () {
-            map.dessinerMap(ctx);
-        }, 40);
+            if (mapInitialised) {
+                console.log('map initialised!')
+                map.update(ctx2, canvasEntities);
+            }
+        }, timeLoop);
 
         initialisationCanvas();
 
 
         io.socket.get('/loadPlayers', null, function (players, jwres) {
+            console.log('load players');
             players.forEach(function (elm, index) {
                 if (index == 0) {
                     joueur = new Personnage("exemple.png", elm.coordX, elm.coordY, elm.direction, elm.name, elm.id);
@@ -104,13 +111,11 @@ $(document).ready(function () {
         io.socket.on('removePlayer', function (user) {
             alert('Aurevoir ' + user.name);
             var indexToRemove = null;
-            console.log('length avant: ' + map.personnages.length);
             map.personnages.forEach(function (elm, index) {
                 if (elm.id == user.id) {
                     indexToRemove = index;
                 }
             })
-            console.log('length apres: ' + map.personnages.length);
             map.personnages.splice(indexToRemove, 1);
         });
 
@@ -188,5 +193,6 @@ $(document).ready(function () {
             $('#inputChat').val('');
             modeChat = false;
         });
+
     })
 });

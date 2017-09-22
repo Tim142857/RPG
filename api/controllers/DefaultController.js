@@ -12,14 +12,22 @@ module.exports = {
             if (err) {
                 console.log(err);
             } else {
-                return res.view('homepage', {idPlayer: req.session.user.id, map: map});
+                User.findOne({id: req.session.user.id}).exec(function (err, user) {
+                    if (err)console.log(err);
+
+                    req.session.user = user;
+                    return res.view('homepage', {idPlayer: req.session.user.id, map: map});
+                });
             }
         })
 
     },
     loadPlayers: function (req, res) {
         var newSocket = sails.sockets.getId(req);
-        User.update({id: req.session.user.id}, {socket: newSocket}).exec(function afterwards(err, updated) {
+        User.update({id: req.session.user.id}, {
+            connected: true,
+            socket: newSocket
+        }).exec(function afterwards(err, updated) {
             if (err)console.log(err);
         });
 
@@ -49,22 +57,38 @@ module.exports = {
     },
     move: function (req, res) {
         var user = req.session.user;
-        user.coordX = req.param('coordX');
-        user.coordY = req.param('coordY');
-        user.direction = req.param('direction');
-        req.session.user = user;
-        User.update({id: req.session.user.id}, {
-            direction: user.direction,
-            coordX: user.coordX,
-            coordY: user.coordY
-        }).exec(function afterwards(err, updated) {
+        var x = req.param('coordX');
+        var y = req.param('coordY');
+
+        Map.findOne({id: 1}).exec(function (err, map) {
             if (err)console.log(err);
+            if (!sails.controllers.default.verifCoord(x, y, map)) {
+                res.send({success: false});
+            } else {
+                user.coordX = x;
+                user.coordY = y;
+                user.direction = req.param('direction');
+                req.session.user = user;
+                User.update({id: req.session.user.id}, {
+                    direction: user.direction,
+                    coordX: user.coordX,
+                    coordY: user.coordY
+                }).exec(function afterwards(err, updated) {
+                    if (err)console.log(err);
+                });
+                sails.sockets.blast('playerMoved', user);
+                res.send({success: true});
+            }
         });
-        sails.sockets.blast('playerMoved', user);
     },
     sendMessage: function (req, res) {
         var message = req.param('message');
         sails.sockets.blast('receiveMessage', {message: message, idUser: req.session.user.id});
+    },
+
+    verifCoord: function (x, y, map) {
+        var myBool = (x >= 0 && y >= 0 && x <= map.width && y <= map.height);
+        return myBool;
     }
 };
 

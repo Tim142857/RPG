@@ -106,6 +106,10 @@ Personnage.prototype.getCoordonneesAdjacentes = function (direction) {
 }
 
 Personnage.prototype.deplacer = function (direction, map) {
+    var oldX = this.x;
+    var oldY = this.y;
+    var oldDirection = this.direction;
+
     // On ne peut pas se déplacer si un mouvement est déjà en cours !
     if (this.etatAnimation >= 0) {
         return false;
@@ -113,17 +117,8 @@ Personnage.prototype.deplacer = function (direction, map) {
 
     // On change la direction du personnage
     this.direction = direction;
-    if (this.id == myId) {
-        io.socket.get('/move', {coordX: this.x, coordY: this.y, direction: this.direction}, function (resData, jwres) {
-        });
-    }
-    // On vérifie que la case demandée est bien située dans la carte
     var prochaineCase = this.getCoordonneesAdjacentes(direction);
-    if (prochaineCase.x < 0 || prochaineCase.y < 0 || prochaineCase.x >= map.getLargeur() || prochaineCase.y >= map.getHauteur()) {
-        // On retourne un booléen indiquant que le déplacement ne s'est pas fait,
-        // Ça ne coute pas cher et ca peut toujours servir
-        return false;
-    }
+
 
     // On commence l'animation
     this.etatAnimation = 1;
@@ -133,8 +128,20 @@ Personnage.prototype.deplacer = function (direction, map) {
     this.y = prochaineCase.y;
 
     //envoi au serveur
-
-
+    if (this.id == myId) {
+        io.socket.get('/move', {
+            coordX: prochaineCase.x,
+            coordY: prochaineCase.y,
+            direction: this.direction
+        }, function (res, jwres) {
+            if (!res.success) {
+                //Annulation du deplacement
+                map.personnages[0].x = oldX;
+                map.personnages[0].y = oldY;
+                map.personnages[0].direction = oldDirection;
+            }
+        });
+    }
     return true;
 }
 

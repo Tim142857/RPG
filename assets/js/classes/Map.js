@@ -29,11 +29,10 @@ Map.prototype.getLargeur = function () {
 
 // Pour ajouter un personnage
 Map.prototype.addPersonnage = function (perso) {
-    console.log('ajout dun perso');
     this.personnages.push(perso);
 }
 
-Map.prototype.dessinerMap = function (context) {
+Map.prototype.initMap = function (context) {
     for (var i = 0, l = this.terrain.length; i < l; i++) {
         var ligne = this.terrain[i];
         var y = i * 32;
@@ -41,8 +40,11 @@ Map.prototype.dessinerMap = function (context) {
             this.tileset.dessinerTile(ligne[j], context, j * 32, y);
         }
     }
+}
 
-    // Dessin des personnages
+Map.prototype.update = function (context, canvas) {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+// Dessin des personnages
     for (var i = 0, l = this.personnages.length; i < l; i++) {
         this.personnages[i].dessinerPersonnage(context);
     }
